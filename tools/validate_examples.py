@@ -23,7 +23,7 @@ EXAMPLES = ROOT / "examples"
 INVALID = ROOT / "conformance" / "invalid"
 V02_EXAMPLES = EXAMPLES / "v0.2"
 V02_INVALID = INVALID / "v0.2"
-V02_EXAMPLE_NAMES = frozenset({"premise-equals.md", "premise-semver.md"})
+V02_EXAMPLE_NAMES = frozenset({"premise-equals.md", "premise-semver.md", "snyk-open-finding.md"})
 V02_INVALID_NAMES = frozenset(
     {
         "two-comparisons.md",
@@ -351,11 +351,21 @@ def main() -> int:
         errors.extend(check_valid(validator_v02, v02_examples))
         for path in v02_examples:
             found = document_errors(path, validator_v01)
-            codes = reason_codes(path, found)
-            if set(codes) != {"additional-properties"}:
-                errors.append(
-                    f"{path}: draft 0.1 reasons {codes} != 'additional-properties'"
-                )
+            document, _ = split_frontmatter(path.read_text(encoding="utf-8"), path)
+            has_premises = isinstance(document, dict) and "premises" in document
+            if has_premises:
+                codes = reason_codes(path, found)
+                if set(codes) != {"additional-properties"}:
+                    errors.append(
+                        f"{path}: draft 0.1 reasons {codes} != 'additional-properties'"
+                    )
+                continue
+            engine = ""
+            checks = document.get("checks") if isinstance(document, dict) else None
+            if isinstance(checks, list) and checks and isinstance(checks[0], dict):
+                engine = str(checks[0].get("engine", ""))
+            if engine == "" or not any(engine in item for item in found):
+                errors.append(f"{path}: draft 0.1 did not reject engine {engine!r}")
 
     v02_invalid, name_errors = named_markdown(V02_INVALID, V02_INVALID_NAMES)
     errors.extend(name_errors)
