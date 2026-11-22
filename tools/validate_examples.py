@@ -1,8 +1,10 @@
 """Validate EDR examples against the JSON Schema and the body rules.
 
-YAML dates become ISO strings before validation. Draft 0.1 and draft 0.2
-schemas are checked against the draft 2020-12 metaschema. The 0.1 corpus
-must pass both drafts. Premises fixtures must pass 0.2 and fail 0.1.
+YAML dates become ISO strings before validation. The draft 0.1, draft 0.2, and
+1.0 schemas are checked against the draft 2020-12 metaschema. The 0.1 corpus
+must pass every version. Premises fixtures must pass 0.2 and 1.0 and fail 0.1.
+The 1.0 schema must equal the 0.2 schema except for $id and title, because 1.0
+freezes the accepted set of draft 0.2.
 """
 
 from __future__ import annotations
@@ -19,6 +21,9 @@ from jsonschema.exceptions import SchemaError
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_V01 = ROOT / "schema" / "edr-v0.1.schema.json"
 SCHEMA_V02 = ROOT / "schema" / "edr-v0.2.schema.json"
+SCHEMA_V10 = ROOT / "schema" / "edr-v1.0.schema.json"
+SCHEMA_V10_ID = "https://ipsoplatform.io/schema/edr/v1.json"
+SCHEMA_V10_TITLE = "EDR 1.0 frontmatter"
 EXAMPLES = ROOT / "examples"
 INVALID = ROOT / "conformance" / "invalid"
 V02_EXAMPLES = EXAMPLES / "v0.2"
@@ -280,6 +285,26 @@ def load_validator(schema_path: Path) -> tuple[Draft202012Validator | None, list
     return Draft202012Validator(schema), []
 
 
+def frozen_schema_errors() -> list[str]:
+    """1.0 freezes draft 0.2. Only $id and title may differ."""
+    try:
+        v02 = json.loads(SCHEMA_V02.read_text(encoding="utf-8"))
+        v10 = json.loads(SCHEMA_V10.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return [f"{SCHEMA_V10}: cannot compare with draft 0.2: {exc}"]
+    errors: list[str] = []
+    if v10.get("$id") != SCHEMA_V10_ID:
+        errors.append(f"{SCHEMA_V10}: $id must be {SCHEMA_V10_ID}")
+    if v10.get("title") != SCHEMA_V10_TITLE:
+        errors.append(f"{SCHEMA_V10}: title must be {SCHEMA_V10_TITLE!r}")
+    for schema in (v02, v10):
+        schema.pop("$id", None)
+        schema.pop("title", None)
+    if v02 != v10:
+        errors.append(f"{SCHEMA_V10}: differs from {SCHEMA_V02.name} beyond $id and title")
+    return errors
+
+
 def check_valid(validator: Draft202012Validator, paths: list[Path]) -> list[str]:
     errors: list[str] = []
     for path in paths:
@@ -326,7 +351,9 @@ def main() -> int:
     errors.extend(load_errors)
     validator_v02, load_errors = load_validator(SCHEMA_V02)
     errors.extend(load_errors)
-    if validator_v01 is None or validator_v02 is None:
+    validator_v10, load_errors = load_validator(SCHEMA_V10)
+    errors.extend(load_errors)
+    if validator_v01 is None or validator_v02 is None or validator_v10 is None:
         for message in errors:
             fail(message)
         return 1
@@ -337,6 +364,7 @@ def main() -> int:
     else:
         errors.extend(check_valid(validator_v01, examples))
         errors.extend(check_valid(validator_v02, examples))
+        errors.extend(check_valid(validator_v10, examples))
 
     shared_invalid = sorted(INVALID.glob("*.md"))
     if not shared_invalid:
@@ -344,11 +372,13 @@ def main() -> int:
     else:
         errors.extend(check_invalid(validator_v01, INVALID))
         errors.extend(check_invalid(validator_v02, INVALID))
+        errors.extend(check_invalid(validator_v10, INVALID))
 
     v02_examples, name_errors = named_markdown(V02_EXAMPLES, V02_EXAMPLE_NAMES)
     errors.extend(name_errors)
     if v02_examples:
         errors.extend(check_valid(validator_v02, v02_examples))
+        errors.extend(check_valid(validator_v10, v02_examples))
         for path in v02_examples:
             found = document_errors(path, validator_v01)
             document, _ = split_frontmatter(path.read_text(encoding="utf-8"), path)
@@ -371,6 +401,9 @@ def main() -> int:
     errors.extend(name_errors)
     if v02_invalid:
         errors.extend(check_invalid(validator_v02, V02_INVALID))
+        errors.extend(check_invalid(validator_v10, V02_INVALID))
+
+    errors.extend(frozen_schema_errors())
 
     if errors:
         for message in errors:
@@ -378,8 +411,10 @@ def main() -> int:
         return 1
     print(
         f"validated {len(examples)} examples and {len(shared_invalid)} invalid fixtures "
-        f"against {SCHEMA_V01.name} and {SCHEMA_V02.name}; "
-        f"validated {len(v02_examples)} v0.2 examples and {len(v02_invalid)} v0.2 invalid fixtures"
+        f"against {SCHEMA_V01.name}, {SCHEMA_V02.name}, and {SCHEMA_V10.name}; "
+        f"validated {len(v02_examples)} v0.2 examples and {len(v02_invalid)} v0.2 invalid fixtures "
+        f"against {SCHEMA_V02.name} and {SCHEMA_V10.name}; {SCHEMA_V10.name} equals {SCHEMA_V02.name} "
+        "except $id and title"
     )
     return 0
 
