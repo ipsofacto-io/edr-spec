@@ -1,6 +1,6 @@
 # Changelog
 
-Notable changes to the specification text, the JSON Schema, the conformance corpus, and the validator. Changes to CI workflows and repository tooling are not listed. Versions follow section 6 of the specification. Newest first.
+Notable changes to the specification text, the JSON Schema, the conformance corpus, and the validator script. Changes to CI workflows, dependency pins, and repository metadata are not listed. Versions follow section 6 of the specification. Newest first.
 
 ## 1.0.0 - 2026-11-22
 
@@ -10,14 +10,14 @@ Stable. 1.0.0 freezes draft 0.2.0. A document is valid at 1.0.0 exactly when it 
 
 - `spec/edr-v1.0.md`, the normative text, with status Stable.
 - `schema/edr-v1.0.schema.json`, with `$id` `https://ipsoplatform.io/schema/edr/v1.json`. Earlier drafts reserved that URI for this release.
-- Section 6 of the text states the versioning rules: a patch changes prose only, a minor only adds and publishes new files with a new `$id`, a major sets `edr: 2`, and a published schema file never changes.
+- Section 6 of the text states the versioning rules: a patch changes prose only, a minor only adds and publishes new files with a new `$id`, a major sets `edr: 2`, and from 1.0.0 on a published schema file never changes.
 - `CHANGELOG.md` and `MIGRATING.md`.
 - `tools/validate_examples.py` runs the whole corpus against the 1.0 schema and checks that the 1.0 schema differs from the draft 0.2 schema only in `$id` and `title`.
 
 ### Changed
 
 - Nothing in the accepted set. No key, enum value, limit, or reason code is added, renamed, or removed.
-- Drafts 0.1.0 and 0.2.0, their schemas, and the corpus paths stay as they are.
+- Drafts 0.1.0 and 0.2.0, their schemas, and the corpus paths stay as they are from 1.0.0 on. Before 1.0.0 the drafts were corrected in place, as the entries below record. A copy of the draft 0.2.0 schema cached before 2026-11-19 lacks the four security tool engines.
 
 ### Feedback behind the freeze
 
@@ -35,11 +35,11 @@ Draft RFC. Accepts every 0.1.0 file. Amended on 2026-11-19.
 - Two checks after the schema, because JSON Schema does not express them: premise ids are unique within a decision, and an `equals` value is at most 1024 bytes as compact UTF-8 JSON.
 - Reason codes `premises` and `premise-id`.
 - `examples/v0.2/` with positive records that draft 0.1.0 rejects, and `conformance/invalid/v0.2/` with 11 negative fixtures.
-- 2026-11-19: the engines `snyk`, `wiz`, `sonarqube`, and `dependabot`. A check for one of them requires `ref`, which is the finding id, at most 128 characters. `examples/v0.2/snyk-open-finding.md` is the example.
+- 2026-11-19: the engines `snyk`, `wiz`, `sonarqube`, and `dependabot`, added in place under the same `$id`. A check for one of them requires `ref`, which is the finding id, at most 128 characters. `examples/v0.2/snyk-open-finding.md` is the example.
 
 ## 0.1.0 - 2026-10-20
 
-First draft RFC. Corrections made in place afterward did not change which documents are valid.
+First draft RFC. Corrections were made in place afterward. They changed no schema rule. One of them, on 2026-10-21, made the body rule explicit that each required level-2 heading appears exactly once, and it added the `duplicate-heading` fixture.
 
 ### Added
 

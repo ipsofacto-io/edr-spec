@@ -6,14 +6,14 @@ EDR 1.0.0 freezes draft 0.2.0. It adds, renames, and removes nothing that draft 
 
 No edit is needed. Every file that is valid at draft 0.1.0 or draft 0.2.0 is valid at 1.0.0, with `edr: 1` unchanged.
 
-A 1.0.0 file reads cleanly in a draft 0.1.0 validator only if it omits `premises` and does not use the `snyk`, `wiz`, `sonarqube`, or `dependabot` engines. Draft 0.1.0 rejects a document with any of those, as `additional-properties`.
+A 1.0.0 file reads cleanly in a draft 0.1.0 validator only if it omits `premises` and does not use the `snyk`, `wiz`, `sonarqube`, or `dependabot` engines. Draft 0.1.0 rejects a document that sets `premises` as `additional-properties`, and it rejects a document that uses one of those engines because the engine is not one of its own.
 
 ## Implementing a validator or a consumer
 
 ### From draft 0.2.0
 
 1. Load `schema/edr-v1.0.schema.json`. It is the draft 0.2.0 schema with a new `$id`, `https://ipsoplatform.io/schema/edr/v1.json`, and a new `title`.
-2. If you resolve the schema by `$id`, register the new `$id`. A validator that keeps the draft 0.2.0 file accepts the same documents, and it names a superseded schema.
+2. If you resolve the schema by `$id`, register the new `$id`. A validator that keeps the draft 0.2.0 file of 2026-11-19 or later accepts the same documents, and it names a superseded schema. A copy of that file from before 2026-11-19 lacks the four security tool engines, so replace it.
 3. Change nothing else. The checks after the schema, the reason codes, and the corpus directories are the same.
 4. Run the conformance suite as section 3 of `spec/edr-v1.0.md` describes. The corpus paths did not change.
 
@@ -29,4 +29,4 @@ Do the steps above, and add what draft 0.2.0 introduced:
 
 ## After 1.0.0
 
-A minor version only adds, and it publishes a new schema file with a new `$id`, such as `https://ipsoplatform.io/schema/edr/v1.1.json`. `https://ipsoplatform.io/schema/edr/v1.json` stays the 1.0.0 schema. State which version your validator accepts, because a validator for 1.0.0 may reject a later minor's addition as `additional-properties`. A major version sets `edr: 2` and ships its own migration guide. Section 6 of the text has the rules.
+A minor version only adds, and it publishes a new schema file with a new `$id`, such as `https://ipsoplatform.io/schema/edr/v1.1.json`. `https://ipsoplatform.io/schema/edr/v1.json` stays the 1.0.0 schema. State which version your validator accepts, because a validator for 1.0.0 may reject a later minor's addition, such as a new key or a new enum value. A major version sets `edr: 2` and ships its own migration guide. Section 6 of the text has the rules.

@@ -300,7 +300,8 @@ def frozen_schema_errors() -> list[str]:
     for schema in (v02, v10):
         schema.pop("$id", None)
         schema.pop("title", None)
-    if v02 != v10:
+    # Compare the JSON encodings. Python treats True == 1, and JSON Schema does not.
+    if json.dumps(v02, sort_keys=True) != json.dumps(v10, sort_keys=True):
         errors.append(f"{SCHEMA_V10}: differs from {SCHEMA_V02.name} beyond $id and title")
     return errors
 

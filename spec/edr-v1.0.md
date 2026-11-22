@@ -18,7 +18,7 @@ The key `edr` is the format generation. Every 0.x draft and every 1.x version us
 | Positive examples | `examples/` and `examples/v0.2/` |
 | Negative fixtures | `conformance/invalid/` and `conformance/invalid/v0.2/` |
 
-The schema `$id` is `https://ipsoplatform.io/schema/edr/v1.json`. That URI is the canonical name of this schema file and of no other file. The file in this repository is the artifact to validate against. Draft 0.1.0 and draft 0.2.0 stay published and unchanged under their own names, `spec/edr-v0.1.md` and `spec/edr-v0.2.md` with `https://ipsoplatform.io/schema/edr/v0.1.json` and `https://ipsoplatform.io/schema/edr/v0.2.json`.
+The schema `$id` is `https://ipsoplatform.io/schema/edr/v1.json`. That URI is the canonical name of this schema file and of no other file. The file in this repository is the artifact to validate against. Draft 0.1.0 and draft 0.2.0 stay published under their own names, `spec/edr-v0.1.md` and `spec/edr-v0.2.md` with `https://ipsoplatform.io/schema/edr/v0.1.json` and `https://ipsoplatform.io/schema/edr/v0.2.json`, and they are not edited from 1.0.0 on. Before 1.0.0 they were corrected in place, and `CHANGELOG.md` lists each correction. In this text, draft 0.2.0 means its schema file as it has stood since 2026-11-19, which added the engines `snyk`, `wiz`, `sonarqube`, and `dependabot`.
 
 This version adds, renames, and removes no key, enum value, limit, or reason code that draft 0.2.0 defines. A document validates against this version exactly when it validates against draft 0.2.0. Every document that validates against draft 0.1.0 or draft 0.2.0 validates against this version with no edit. A document that sets `premises` does not validate against draft 0.1.0, and a check that uses the `snyk`, `wiz`, `sonarqube`, or `dependabot` engine does not validate against draft 0.1.0.
 
@@ -197,6 +197,6 @@ This document follows SemVer, `MAJOR.MINOR.PATCH`, and the `edr` key carries the
 - A minor only adds. It may add an optional key, add an enum value, or widen a limit. Every document that is valid at the previous version stays valid with the same meaning. A minor publishes a new text `spec/edr-v1.N.md`, a new schema `schema/edr-v1.N.schema.json`, and a new `$id` `https://ipsoplatform.io/schema/edr/v1.N.json`. It keeps `edr: 1`.
 - A major is any other change. It sets `edr: 2`, publishes new files and a new `$id`, and ships a migration guide.
 
-A published schema file never changes, and its `$id` names that file alone. `https://ipsoplatform.io/schema/edr/v1.json` names the 1.0.0 schema. It is not an alias for the latest 1.x schema. Each release is recorded in `CHANGELOG.md`, and `MIGRATING.md` covers the move from an earlier version.
+From 1.0.0 on, a published schema file never changes, and its `$id` names that file alone. `https://ipsoplatform.io/schema/edr/v1.json` names the 1.0.0 schema. It is not an alias for the latest 1.x schema. Each release is recorded in `CHANGELOG.md`, and `MIGRATING.md` covers the move from an earlier version.
 
-A validator written for one 1.x version may reject a document that uses a later minor's addition, as `additional-properties`. A consumer states which version it validates.
+A validator written for one 1.x version may reject a document that uses a later minor's addition, such as a new key or a new enum value. A consumer states which version it validates.
