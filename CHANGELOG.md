@@ -49,4 +49,4 @@ First draft RFC. Corrections were made in place afterward. They changed no schem
 ### Changed
 
 - 2026-10-24 to 2026-10-27: the module-boundaries, ArchUnit, and ESLint examples name a JSON rule file.
-- 2026-10-20 and 2026-10-27: the draft schema `$id` host was corrected to `ipsoplatform.io`, and the text reads EDR as Engineering Decision Record.
+- 2026-10-20 and 2026-10-27: the draft schema `$id` host was changed twice in place and ends at `ipsoplatform.io`. A copy of the 0.1.0 schema taken before 2026-10-27 has a different `$id` host and the same rules. The text also reads EDR as Engineering Decision Record.
