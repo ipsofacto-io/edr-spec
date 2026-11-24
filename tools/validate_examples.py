@@ -1,10 +1,11 @@
 """Validate EDR examples against the JSON Schema and the body rules.
 
-YAML dates become ISO strings before validation. The draft 0.1, draft 0.2, and
-1.0 schemas are checked against the draft 2020-12 metaschema. The 0.1 corpus
-must pass every version. Premises fixtures must pass 0.2 and 1.0 and fail 0.1.
-The 1.0 schema must equal the 0.2 schema except for $id and title, because 1.0
-freezes the accepted set of draft 0.2.
+YAML dates become ISO strings before validation. The draft 0.1, draft 0.2, 1.0,
+and 1.1 schemas are checked against the draft 2020-12 metaschema. The 0.1 corpus
+must pass every version. Premises fixtures must pass 0.2, 1.0, and 1.1 and fail
+0.1. Minor 1.1 fixtures must pass 1.1 and fail 1.0. The 1.0 schema must equal
+the 0.2 schema except for $id and title, because 1.0 freezes the accepted set of
+draft 0.2.
 """
 
 from __future__ import annotations
@@ -54,6 +55,8 @@ V11_INVALID_NAMES = frozenset(
     {
         "llm-missing-ref.md",
         "llm-traversal-ref.md",
+        "llm-url-ref.md",
+        "llm-backslash-ref.md",
         "max-age-zero.md",
         "max-age-366.md",
         "verified-only-llm-advisory.md",

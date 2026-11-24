@@ -85,7 +85,7 @@ Required. One of:
 
 These tokens use hyphens. They are the file vocabulary. A product may show different words in a user interface. Those display words are not valid `status` values.
 
-`verified` MUST include at least one check whose `engine` is not `llm-advisory`.
+`verified` MUST include at least one check whose `engine` is not `llm-advisory`. Frontmatter validation checks structural declaration only; a schema-only consumer that does not inspect compiled check artifacts or runtime verdicts MUST NOT treat `status: verified` on an `engine: llm` record as proof that `allow`/`deny` fixtures or grounded input quotes were satisfied.
 
 ### 4.6 `owner`
 
@@ -127,7 +127,7 @@ Each check object requires `engine` and MAY set `target`, `ref`, `job`, `mode`, 
 `target` and `ref` name the subject and the rule artifact. `job` names an existing CI job that supplies evidence (`ci-binding`).
 
 - For `snyk`, `wiz`, `sonarqube`, and `dependabot`, `ref` MUST be present (1 to 128 characters, no ASCII control character, no leading or trailing space).
-- For `llm`, `ref` MUST be present (1 to 255 characters, relative path without leading `/`, `..` path segments, ASCII control characters, or spaces, such as `.ipso/checks/firewall-egress.llm.json`). Compilers that support `mode: block` on `llm` require approved `allow` and `deny` fixtures in the referenced artifact and verbatim input quotes at evaluation time; those rules belong to the compiler and evaluator contracts rather than frontmatter schema validation.
+- For `llm`, `ref` MUST be present (1 to 255 characters, repository-relative forward-slash path without leading or trailing `/`, `:` scheme or drive separators, `\` backslashes, empty `//` segments, `..` path segments, ASCII control characters, or spaces, such as `.ipso/checks/firewall-egress.llm.json`). Compilers that support `mode: block` on `llm` MUST require approved `allow` and `deny` fixtures in the referenced artifact and evaluators MUST require verbatim input quotes at evaluation time; schema-only consumers MUST NOT treat schema validity alone as enforcement proof.
 - `max_age_days` is an optional integer from `1` to `365` inclusive. When set, consumers treat a check whose latest verdict is older than `max_age_days` days as stale. When omitted, a consumer MAY apply its own default window.
 
 ### 4.12 `waivers`
