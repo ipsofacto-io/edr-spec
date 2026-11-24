@@ -57,6 +57,7 @@ V11_INVALID_NAMES = frozenset(
         "llm-traversal-ref.md",
         "llm-url-ref.md",
         "llm-backslash-ref.md",
+        "llm-encoded-ref.md",
         "max-age-zero.md",
         "max-age-366.md",
         "verified-only-llm-advisory.md",
