@@ -22,13 +22,19 @@ ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_V01 = ROOT / "schema" / "edr-v0.1.schema.json"
 SCHEMA_V02 = ROOT / "schema" / "edr-v0.2.schema.json"
 SCHEMA_V10 = ROOT / "schema" / "edr-v1.0.schema.json"
+SCHEMA_V11 = ROOT / "schema" / "edr-v1.1.schema.json"
 SCHEMA_V10_ID = "https://ipsoplatform.io/schema/edr/v1.json"
 SCHEMA_V10_TITLE = "EDR 1.0 frontmatter"
+SCHEMA_V11_ID = "https://ipsoplatform.io/schema/edr/v1.1.json"
+SCHEMA_V11_TITLE = "EDR 1.1 frontmatter"
 EXAMPLES = ROOT / "examples"
 INVALID = ROOT / "conformance" / "invalid"
 V02_EXAMPLES = EXAMPLES / "v0.2"
 V02_INVALID = INVALID / "v0.2"
+V11_EXAMPLES = EXAMPLES / "v1.1"
+V11_INVALID = INVALID / "v1.1"
 V02_EXAMPLE_NAMES = frozenset({"premise-equals.md", "premise-semver.md", "snyk-open-finding.md"})
+V11_EXAMPLE_NAMES = frozenset({"llm-verified-check.md", "check-max-age-days.md"})
 V02_INVALID_NAMES = frozenset(
     {
         "two-comparisons.md",
@@ -42,6 +48,15 @@ V02_INVALID_NAMES = frozenset(
         "duplicate-premise-id.md",
         "equals-too-large.md",
         "semver-build.md",
+    }
+)
+V11_INVALID_NAMES = frozenset(
+    {
+        "llm-missing-ref.md",
+        "llm-traversal-ref.md",
+        "max-age-zero.md",
+        "max-age-366.md",
+        "verified-only-llm-advisory.md",
     }
 )
 
@@ -167,6 +182,17 @@ def schema_reason(error: object) -> str:
         if getattr(error, "instance", None) == []:
             return "checks-empty"
         return "checks-deterministic"
+    if len(path) >= 3 and path[0] == "checks" and path[2] == "ref":
+        return "check-ref"
+    if (
+        len(path) == 2
+        and path[0] == "checks"
+        and keyword == "required"
+        and "'ref' is a required property" in getattr(error, "message", "")
+    ):
+        return "check-ref"
+    if len(path) >= 3 and path[0] == "checks" and path[2] == "max_age_days":
+        return "check-max-age"
     if path[:1] == ["premises"]:
         return "premises"
     return ""
@@ -354,10 +380,23 @@ def main() -> int:
     errors.extend(load_errors)
     validator_v10, load_errors = load_validator(SCHEMA_V10)
     errors.extend(load_errors)
-    if validator_v01 is None or validator_v02 is None or validator_v10 is None:
+    validator_v11, load_errors = load_validator(SCHEMA_V11)
+    errors.extend(load_errors)
+    if (
+        validator_v01 is None
+        or validator_v02 is None
+        or validator_v10 is None
+        or validator_v11 is None
+    ):
         for message in errors:
             fail(message)
         return 1
+
+    v11_raw = json.loads(SCHEMA_V11.read_text(encoding="utf-8"))
+    if v11_raw.get("$id") != SCHEMA_V11_ID:
+        errors.append(f"{SCHEMA_V11}: $id must be {SCHEMA_V11_ID}")
+    if v11_raw.get("title") != SCHEMA_V11_TITLE:
+        errors.append(f"{SCHEMA_V11}: title must be {SCHEMA_V11_TITLE!r}")
 
     examples = sorted(EXAMPLES.glob("*.md"))
     if len(examples) != 21:
@@ -366,6 +405,7 @@ def main() -> int:
         errors.extend(check_valid(validator_v01, examples))
         errors.extend(check_valid(validator_v02, examples))
         errors.extend(check_valid(validator_v10, examples))
+        errors.extend(check_valid(validator_v11, examples))
 
     shared_invalid = sorted(INVALID.glob("*.md"))
     if not shared_invalid:
@@ -374,12 +414,14 @@ def main() -> int:
         errors.extend(check_invalid(validator_v01, INVALID))
         errors.extend(check_invalid(validator_v02, INVALID))
         errors.extend(check_invalid(validator_v10, INVALID))
+        errors.extend(check_invalid(validator_v11, INVALID))
 
     v02_examples, name_errors = named_markdown(V02_EXAMPLES, V02_EXAMPLE_NAMES)
     errors.extend(name_errors)
     if v02_examples:
         errors.extend(check_valid(validator_v02, v02_examples))
         errors.extend(check_valid(validator_v10, v02_examples))
+        errors.extend(check_valid(validator_v11, v02_examples))
         for path in v02_examples:
             found = document_errors(path, validator_v01)
             document, _ = split_frontmatter(path.read_text(encoding="utf-8"), path)
@@ -403,6 +445,21 @@ def main() -> int:
     if v02_invalid:
         errors.extend(check_invalid(validator_v02, V02_INVALID))
         errors.extend(check_invalid(validator_v10, V02_INVALID))
+        errors.extend(check_invalid(validator_v11, V02_INVALID))
+
+    v11_examples, name_errors = named_markdown(V11_EXAMPLES, V11_EXAMPLE_NAMES)
+    errors.extend(name_errors)
+    if v11_examples:
+        errors.extend(check_valid(validator_v11, v11_examples))
+        for path in v11_examples:
+            found_v10 = document_errors(path, validator_v10)
+            if not found_v10:
+                errors.append(f"{path}: expected 1.0 schema to reject v1.1 feature")
+
+    v11_invalid, name_errors = named_markdown(V11_INVALID, V11_INVALID_NAMES)
+    errors.extend(name_errors)
+    if v11_invalid:
+        errors.extend(check_invalid(validator_v11, V11_INVALID))
 
     errors.extend(frozen_schema_errors())
 
@@ -412,9 +469,11 @@ def main() -> int:
         return 1
     print(
         f"validated {len(examples)} examples and {len(shared_invalid)} invalid fixtures "
-        f"against {SCHEMA_V01.name}, {SCHEMA_V02.name}, and {SCHEMA_V10.name}; "
+        f"against {SCHEMA_V01.name}, {SCHEMA_V02.name}, {SCHEMA_V10.name}, and {SCHEMA_V11.name}; "
         f"validated {len(v02_examples)} v0.2 examples and {len(v02_invalid)} v0.2 invalid fixtures "
-        f"against {SCHEMA_V02.name} and {SCHEMA_V10.name}; {SCHEMA_V10.name} equals {SCHEMA_V02.name} "
+        f"against {SCHEMA_V02.name}, {SCHEMA_V10.name}, and {SCHEMA_V11.name}; "
+        f"validated {len(v11_examples)} v1.1 examples and {len(v11_invalid)} v1.1 invalid fixtures "
+        f"against {SCHEMA_V11.name}; {SCHEMA_V10.name} equals {SCHEMA_V02.name} "
         "except $id and title"
     )
     return 0
