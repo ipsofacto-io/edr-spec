@@ -2,6 +2,19 @@
 
 Notable changes to the specification text, the JSON Schema, the conformance corpus, and the validator script. Changes to CI workflows, dependency pins, and repository metadata are not listed. Versions follow section 6 of the specification. Newest first.
 
+## 1.1.0 - 2026-11-24
+
+Additive minor release. Every 0.1.0, 0.2.0, and 1.0.0 file is valid at 1.1.0 with no edit and with the same meaning, and `schema/edr-v1.0.schema.json` is unchanged.
+
+### Added
+
+- `spec/edr-v1.1.md`, the normative text for version 1.1.0.
+- `schema/edr-v1.1.schema.json`, with `$id` `https://ipsoplatform.io/schema/edr/v1.1.json`.
+- Check engine `llm`, which counts toward `status: verified` and requires a portable repository-relative `ref` (1 to 255 characters, non-empty `[A-Za-z0-9._-]+` segments, no `.` or `..` segments, no leading or trailing `/`, no `//`, no `%` percent-encoding, no `:` colons, and no `\` backslashes, resolved literally without URL-decoding and rejecting symlinks outside the repository root). `llm-advisory` remains unchanged and excluded from `verified`.
+- Optional check field `max_age_days` (`1` to `365`), naming the maximum age in days of a verdict before consumers treat the check as stale.
+- Reason codes `check-ref` and `check-max-age`, `examples/v1.1/`, and `conformance/invalid/v1.1/`.
+- `tools/validate_examples.py` validates the entire corpus against `schema/edr-v1.1.schema.json` in addition to 0.1, 0.2, and 1.0.
+
 ## 1.0.0 - 2026-11-22
 
 Stable. 1.0.0 freezes draft 0.2.0. A document is valid at 1.0.0 exactly when it is valid at draft 0.2.0, so every 0.1.0 and 0.2.0 file is a 1.0.0 file with no edit.

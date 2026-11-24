@@ -27,6 +27,12 @@ Do the steps above, and add what draft 0.2.0 introduced:
 4. Accept the engines `snyk`, `wiz`, `sonarqube`, and `dependabot`. A check for one of them requires `ref`, the finding id, at most 128 characters, with no ASCII control character and no leading or trailing space.
 5. If you fetch a premise URL, follow the consumer obligations in section 4.16. The schema does not check them.
 
+## Moving to 1.1.0
+
+1. Existing 0.1.0, 0.2.0, and 1.0.0 files need no edit at 1.1.0.
+2. Validators adopting 1.1.0 load `schema/edr-v1.1.schema.json` (`https://ipsoplatform.io/schema/edr/v1.1.json`), accept `engine: llm` (with required portable repository-relative `ref`) and optional `check.max_age_days` (`1..365`), and report `check-ref` and `check-max-age` on `conformance/invalid/v1.1/`.
+3. Consumers and compilers loading `engine: llm` `ref` artifacts must follow section 4.11 of `spec/edr-v1.1.md`: resolve `ref` literally against the repository root without URL-decoding, reject symlinks escaping the repository root, require `allow` and `deny` fixtures when `mode` is `block`, and require verbatim input quotes at evaluation time. Schema validity alone is not enforcement proof.
+
 ## After 1.0.0
 
 A minor version only adds, and it publishes a new schema file with a new `$id`, such as `https://ipsoplatform.io/schema/edr/v1.1.json`. `https://ipsoplatform.io/schema/edr/v1.json` stays the 1.0.0 schema. State which version your validator accepts, because a validator for 1.0.0 may reject a later minor's addition, such as a new key or a new enum value. A major version sets `edr: 2` and ships its own migration guide. Section 6 of the text has the rules.
