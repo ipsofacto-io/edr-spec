@@ -30,7 +30,8 @@ Do the steps above, and add what draft 0.2.0 introduced:
 ## Moving to 1.1.0
 
 1. Existing 0.1.0, 0.2.0, and 1.0.0 files need no edit at 1.1.0.
-2. Validators adopting 1.1.0 load `schema/edr-v1.1.schema.json` (`https://ipsoplatform.io/schema/edr/v1.1.json`), accept `engine: llm` (with required relative `ref`) and optional `check.max_age_days` (`1..365`), and report `check-ref` and `check-max-age` on `conformance/invalid/v1.1/`.
+2. Validators adopting 1.1.0 load `schema/edr-v1.1.schema.json` (`https://ipsoplatform.io/schema/edr/v1.1.json`), accept `engine: llm` (with required portable repository-relative `ref`) and optional `check.max_age_days` (`1..365`), and report `check-ref` and `check-max-age` on `conformance/invalid/v1.1/`.
+3. Consumers and compilers loading `engine: llm` `ref` artifacts must follow section 4.11 of `spec/edr-v1.1.md`: resolve `ref` literally against the repository root without URL-decoding, reject symlinks escaping the repository root, require `allow` and `deny` fixtures when `mode` is `block`, and require verbatim input quotes at evaluation time. Schema validity alone is not enforcement proof.
 
 ## After 1.0.0
 
