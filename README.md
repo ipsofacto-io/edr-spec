@@ -22,8 +22,8 @@ Existing MADR or Nygard ADRs without YAML frontmatter are not EDR documents unti
 | Version | Status | Specification | JSON Schema | Schema `$id` | Notes |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.0 | Stable (latest) | [spec/edr-v1.1.md](spec/edr-v1.1.md) | [schema/edr-v1.1.schema.json](schema/edr-v1.1.schema.json) | `https://ipsoplatform.io/schema/edr/v1.1.json` | Adds `llm` check engine (with required relative `ref`) and optional `check.max_age_days` (`1..365`); backwards-compatible with 0.1.0, 0.2.0, and 1.0.0 |
-| 1.0.0 | Stable | [spec/edr-v1.0.md](spec/edr-v1.0.md) | [schema/edr-v1.0.schema.json](schema/edr-v1.0.schema.json) | `https://ipsoplatform.io/schema/edr/v1.json` | Freezes draft 0.2.0 (identical validation rules; differs only in `$id` and `title`); adds optional `premises` |
-| 0.2.0 | Draft RFC (superseded) | [spec/edr-v0.2.md](spec/edr-v0.2.md) | [schema/edr-v0.2.schema.json](schema/edr-v0.2.schema.json) | `https://ipsoplatform.io/schema/edr/v0.2.json` | Frozen as of 1.0.0; superseded by 1.0.0 |
+| 1.0.0 | Stable | [spec/edr-v1.0.md](spec/edr-v1.0.md) | [schema/edr-v1.0.schema.json](schema/edr-v1.0.schema.json) | `https://ipsoplatform.io/schema/edr/v1.json` | Freezes draft 0.2.0 with identical validation rules (differs only in `$id` and `title`), keeping optional `premises` introduced in 0.2.0 |
+| 0.2.0 | Draft RFC (superseded) | [spec/edr-v0.2.md](spec/edr-v0.2.md) | [schema/edr-v0.2.schema.json](schema/edr-v0.2.schema.json) | `https://ipsoplatform.io/schema/edr/v0.2.json` | Introduces optional `premises`; frozen as of 1.0.0 and superseded by 1.0.0 |
 | 0.1.0 | Draft RFC (superseded) | [spec/edr-v0.1.md](spec/edr-v0.1.md) | [schema/edr-v0.1.schema.json](schema/edr-v0.1.schema.json) | `https://ipsoplatform.io/schema/edr/v0.1.json` | Frozen as of 1.0.0; predates `premises` |
 
 See [CHANGELOG.md](CHANGELOG.md) for notable changes and [MIGRATING.md](MIGRATING.md) for upgrading to 1.0 and 1.1.
@@ -35,7 +35,7 @@ See [CHANGELOG.md](CHANGELOG.md) for notable changes and [MIGRATING.md](MIGRATIN
 | [`spec/`](spec/) | Normative specification documents for each published version |
 | [`schema/`](schema/) | Immutable JSON Schemas for EDR YAML frontmatter |
 | [`examples/`](examples/) | Positive fixtures valid across all versions (21 base fixtures), plus version-specific fixtures under [`examples/v0.2/`](examples/v0.2/) and [`examples/v1.1/`](examples/v1.1/) |
-| [`conformance/invalid/`](conformance/invalid/) | Negative fixtures for every version, plus [`conformance/invalid/v0.2/`](conformance/invalid/v0.2/) and [`conformance/invalid/v1.1/`](conformance/invalid/v1.1/); each `.expect` file matches one stable reason code from section 3 of the spec |
+| [`conformance/invalid/`](conformance/invalid/) | Negative fixtures for every version, plus [`conformance/invalid/v0.2/`](conformance/invalid/v0.2/) and [`conformance/invalid/v1.1/`](conformance/invalid/v1.1/); each `.expect` file matches one stable reason code from section 3 of the corresponding spec (`check-ref` and `check-max-age` are defined in `spec/edr-v1.1.md` §3) |
 | [`tools/validate_examples.py`](tools/validate_examples.py) | Reference conformance runner that validates all fixtures against all four schemas in CI |
 
 ## Run the conformance suite
@@ -49,7 +49,7 @@ python3 tools/validate_examples.py
 
 ## Versioning rules
 
-The EDR format follows Semantic Versioning (full rules in Section 6 of [spec/edr-v1.0.md](spec/edr-v1.0.md)):
+The EDR format follows Semantic Versioning (full rules in Section 6 of [spec/edr-v1.1.md](spec/edr-v1.1.md) and [spec/edr-v1.0.md](spec/edr-v1.0.md)):
 
 - **Patch:** Prose clarifications only; schemas never change.
 - **Minor:** Additive changes published as new files with a new `$id` (for example `https://ipsoplatform.io/schema/edr/v1.1.json`). Existing schema files are immutable from 1.0.0 onward.
